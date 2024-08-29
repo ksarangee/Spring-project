@@ -1,0 +1,19 @@
+{{>layouts/header}}
+
+{{#article}}
+<form class="container" action="/articles/update" method="post">
+    <input name="id" type="hidden" value="{{id}}"> <!--서버에 id가 몇 번인 article을 수정하는지 알려 줘야 하니 id속성 추가-->
+    <div class="mb-3">
+        <label class="form-label">제목</label>
+        <input type="text" class="form-control" name="title" value="{{title}}">
+    </div>
+    <div class="mb-3">
+        <label class="form-label">내용</label>
+        <textarea class="form-control" rows="3" name="content">{{content}}</textarea>
+    </div>
+    <button type="sumbit" class="btn btn-primary">Submit</button>
+    <a href="/articles/{{id}}">Back</a> <!--해당 id의 상세페이지로 돌아감-->
+</form>
+{{/article}}
+
+{{>layouts/footer}}
