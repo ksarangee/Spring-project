@@ -27,45 +27,39 @@ public class ArticleApiController {
     public Article show(@PathVariable("id") Long id) { //id는 요청 url에서 가져 오므로 매개변수 앞에 @PathVariable 붙이기
         return articleService.show(id); //서비스가 조회 요청 처
     }
-/*
+
     //POST
     @PostMapping("/api/articles")
-    public Article create(@RequestBody ArticleForm dto) { //JSON 데이터를 받아 와햐 하니깐 @RequestBody 추가
-        Article article = dto.toEntity();
-        return articleRepository.save(article);
+    public ResponseEntity<Article> create(@RequestBody ArticleForm dto) { //JSON 데이터를 받아 와햐 하니깐 @RequestBody 추가
+        Article created = articleService.create(dto);
+        return (created != null) ? //생성하면 정상 응답, 실패하면 오류 응답
+                ResponseEntity.status(HttpStatus.OK).body(created) :
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 
     //PATCH
     @PatchMapping("/api/articles/{id}")
     public ResponseEntity<Object> update(@PathVariable("id") Long id, @RequestBody ArticleForm dto) {
-        //1. DTO -> 엔티티 변환
-        Article article = dto.toEntity();
-        log.info("id: {}, article: {}", id, article.toString());
-        //2. 타깃 조회
-        Article target = articleRepository.findById(id).orElse(null);
-        //3. 잘못된 요청 처리
-        if (target == null || id != article.getId()) {
-            //400
-            log.info("잘못된 요청 id: {}, article: {}", id, article.toString());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
-        //4. 업데이트 및 정상 응답(200)하기
-        target.patch(article); //기존 데이터에 새 데이터 붙이기
-        Article updated = articleRepository.save(target); //수정 내용 DB에 최종 저장
-        return ResponseEntity.status(HttpStatus.OK).body(updated);
+        Article updated = articleService.update(id, dto); //서비스를 통해 게시글 수정
+        return (updated != null) ? //수정되면 정상 응답, 안되면 오류 응답
+                ResponseEntity.status(HttpStatus.OK).body(updated) :
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 
     //DELETE
     @DeleteMapping("/api/articles/{id}")
     public ResponseEntity<Article> delete(@PathVariable("id") Long id) {
-        //1. 대상 찾기
-        Article target = articleRepository.findById(id).orElse(null);
-        //2. 잘못된 요청 처리
-        if (target == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
-        //3. 대상 삭제
-        articleRepository.delete(target);
-        return ResponseEntity.status(HttpStatus.OK).build(); //build()는 body(null)과 동일
-    }*/
+        Article deleted = articleService.delete(id);
+        return (deleted != null) ? //deleted에 내용이 있으면 삭제되었다는 뜻, deleted에 내용이 없다면 삭제 실패했다는 뜻
+                ResponseEntity.status(HttpStatus.NO_CONTENT).build() : //NO_CONTENT는 삭제되었다는 뜻
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    }
+
+    @PostMapping("/api/transaction-test") //여러 게시글 생성 요청 접수
+    public ResponseEntity<List<Article>> transactionTest (@RequestBody List<ArticleForm> dtos) {
+        List<Article> createdList = articleService.createArticles(dtos); //서비스 호출, dtos는 dto 묶음
+        return (createdList != null) ?
+                ResponseEntity.status(HttpStatus.OK).body(createdList) :
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    } //transactionTest() 메서드 정의
 }
