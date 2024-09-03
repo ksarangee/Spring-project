@@ -12,5 +12,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Comment> findByArticleId(Long articleId);
 
     //특정 닉네임의 모든 댓글 조회
+    //수행할 쿼리는 orm.xml 파일에 작성함
     List<Comment> findByNickname(String nickname);
 }
